@@ -7,14 +7,14 @@ requirements:
 ### database layer: 
 
 ### 1) Creation of Vpc:
-in vpc select vpc and more
-vpc-name: demo-vpc
-cidr: 192.168.0.0/22
-ipv6: No required
-Tendency: Default
-Public Subnets: 2
-Private Subnet: 4
-Nat: in 1 AZ
+in vpc select vpc and more.
+vpc-name: demo-vpc.
+cidr: 192.168.0.0/22.
+ipv6: No required.
+Tendency: Default.
+Public Subnets: 2.
+Private Subnet: 4.
+Nat: in 1 AZ.
 then create VPC.
 
 
