@@ -49,41 +49,41 @@ requirements:
 
 - Go Back and Create RDS Database:
 - Standard:
-Engine: Mysql
-Template: Free 
-DB Name: database-1
-Username: admin       ## set according to you
-Password:  admin123  ## set according to you
+- Engine: Mysql
+- Template: Free 
+- DB Name: database-1
+- Username: admin       ## set according to you
+- Password:  admin123  ## set according to you
 
-Virtual Private Cloud(vpc)
-Select vpc which you have created.  demo-vpc
-Subnet Group: which you have created  example: db-subnet
+- Virtual Private Cloud(vpc)
+- Select vpc which you have created.  demo-vpc
+- Subnet Group: which you have created  example: db-subnet
 
-SG: Select default for temp 
+- SG: Select default for temp 
 
-avz: no preference
+- avz: no preference
 
-every will remain same and create database.
+- every will remain same and create database.
 
 ### 5) Application Tire Setup.
-Launch EC2 Instance.
-Name: AppTireinstance
-Image: Amazone 
-AMI: Amazone Linux 2 AMI (HVM)
-InstanceType: T2-Micro or small.
-KayPair: Proceed Without Key pair
-Network Setting:  select vpc which you have created 
-subent: app
-Ip Address: no assign 
-security group: Default 
+- Launch EC2 Instance.
+- Name: AppTireinstance
+- Image: Amazone 
+- AMI: Amazone Linux 2 AMI (HVM)
+- InstanceType: T2-Micro or small.
+- KayPair: Proceed Without Key pair
+- Network Setting:  select vpc which you have created 
+- subent: app
+- Ip Address: no assign 
+- security group: Default 
 
 
 Go to Advance Setting.
 IAM Role Profile  --> add Iam which u have Created  example: demo-ec2-role-ssm   ## dont forget to add.
 
-Then Launch Instance.
-Connect to the Instance with Session Manager.
-login into server via session manager.
+- Then Launch Instance.
+- Connect to the Instance with Session Manager.
+- login into server via session manager.
 ```
 sudo su
 ```
@@ -161,16 +161,16 @@ then exit;
 exit;
 ```
 
-now go to the that file folder in your local file file manager where you have cloned 
-folder application code -- app-tire--DbConfig
-add DB HOST: 'rds database endpoint'
-DB_USER: 'admin'
-DB : 'admin123'
-DB_DATABASE: 'webappdb'   ## which means only replace values
+- now go to the that file folder in your local file file manager where you have cloned 
+- folder application code -- app-tire--DbConfig
+- add DB HOST: 'rds database endpoint'
+- DB_USER: 'admin'
+- DB : 'admin123'
+- DB_DATABASE: 'webappdb'   ## which means only replace values
 
-go s3 bucket do same path application - apptire- dbConfig replace updated file with this make sure bucket versioning should be enable.
+- go s3 bucket do same path application - apptire- dbConfig replace updated file with this make sure bucket versioning should be enable.
 or uplode that folder again in same s3 bucet it will create new version like in your s3 bucket there is folder available name application-code
-select add folder add new updated folder into your s3 bucket.
+- select add folder add new updated folder into your s3 bucket.
 
 Go back on Your Server and Install Node.js By Below Given Command.
 
@@ -200,9 +200,175 @@ cd ..
 cd ~/
 ```
 
-
+copy app tire file form s3  to your machine by using given command.
+```
+sudo aws s3 cp s3://<bucket name>/application-code/app-tire/ app-tire --recursive
 
 ```
+Example.
+```
+ sudo aws s3 cp s3://three-tire-bucket-ssm/application-code/app-tier/ app-tier --recursive
+
+```
+```
+ls
+```
+- this will copy folder app-tire 
+```
+cd app-tire
+
+```
+```
+npm install   ## it will create index.js file
+```
+```
+pm2 start index.js    ## this will start index.js
+```
+
+```
+pm2 status   # will show status
+```
+
+```
+pm2 startup
+```
+``` 
+pm2 save 
+```
+
+```
+curl http://localhost:4000/health  # output  this is health check.
+```
+
+- crate loadbalancer
+- before that create target groups  
+- Target Type: Instance
+- Target Group Name:   App-Internal-TG
+- protocol: http  Port no: 4000
+- vpc -- creatred by you
+- Health check  http:   path /health
+- next select AppTireInstance
+
+  - include as pending below  then create target group.
+ 
+    
+- now create load balancer  appication loadbalaner
+- Name: App-Internal-LB
+- choose: Internal
+- Network: created vpc 
+- avz : select both 1a   secect app subnet and 1b  select app2 subnet
+
+- sg -- add default
+
+- Listerener and routing
+- target group App-Internal-TG
+
+- now go the your local system and find ngnix.conf
+
+- there scroll down it will show dns of internal loadbalaner which is old copy dns of your current load balancer and paste it there.
+- go the the s3 bucket and replace  ngnix.conf which new one.
+
+###  web tire 
+ - Lanuch ec2 instance:  `Web-Tire-Instance`
+ - image: `amazone`
+- ami: `Amazone Linux 2 AMI`
+- InstanceType: `t2.micro`
+- key pair: `proceed without key pair.`
+- Network: `Selecte Created Vpc` 
+- Subnet: Public Subnet 1a
+- Ip: yes
+- sg: default
+
+- go to the advance setting
+- select existing IAM role and launch instance.
+
+- connect to your web ec2 instance by using session manager.
+```
+sudo ec2-user
+```
+```
+cd /home/ec2-user
+
+```
+
+### install Node.js
+
+```
+curl -o- https://raw.githubusercontent.com/avizway1/aws_3tier_architecture/main/install.sh | bash
+```
+```
+source ~/.bashrc
+```
+```
+nvm install 16    # node version manager
+```
+```
+nvm use 16
+```
+```
+npm install -g pm2  (you will see found 0 vaulnarbalites )
+```
+```
+sudo aws s3 cp s3://<your s3 bucket name> /application-code/app-tire/ app-tire --recursive
+```
+```
+sudo aws s3 cp s3://three-tire-bucket-ssm/application-code/web-tier/ web-tier --recursive
+```
+```
+cd web-tire
+```
+```
+npm install
+```
+
+```
+npm run build
+```
+
+
+#install nginx
+```
+sudo amazon-linux-extras install nginxl -y
+```
+```
+cd /etc/nginx
+```  
+# find nginx.conf]
+```
+sudo rm nginx.conf
+```
+````
+sudo aws s3 cp s3://<bucket name>/application-code/nginx.conf .
+```
+eample.
+```
+sudo aws s3 cp s3://three-tire-bucket-ssm/application-code/nginx.conf .
+```
+
+```
+sudo service nginx restart   # install nginx
+```
+```
+chmod -R 755 /home/ec2-user
+```
+```
+sudo chkconfig nginx on
+```
+
+``` 
+
+now copy the public IP address of web-instance  = http://<ip address>
+```
+
+
+
+
+
+
+
+
+
+
 
 
 
