@@ -1,150 +1,168 @@
-#  🚀 3-Tier Application AWS Project 🌩️
-
-```diff
-+===========================================================+
-|                  PROJECT REQUIREMENTS                     |
-+===========================================================+
-| 🕸️ WEB LAYER    | 🖥️ APP LAYER    | 🗃️ DATABASE LAYER  |
-+-----------------+-----------------+-----------------------+
+# 🎯 3-Tier AWS Architecture Project Guide 🚀
 
 ---
 
-# 📋 **Project Overview:**
+## ✅ Project Requirements
 
-A simple **3-Tier Architecture Web Application** deployment on **AWS Cloud**
-
-### 🏗️ **Architecture Tiers:**
-
-* **Web Layer** (Frontend - Web Tier EC2)
-* **App Layer** (Backend - Node.js App on EC2)
-* **Database Layer** (RDS MySQL)
+- **Web Layer:** Serves the frontend using EC2 & NGINX.
+- **App Layer:** Node.js backend, EC2 instance.
+- **Database Layer:** MySQL using Amazon RDS.
 
 ---
 
-## 🌐 **1. VPC Setup**
+## 🧱 Step 1: Create VPC 🛰️
 
-### 🧰 VPC Configuration:
+- VPC Name: `demo-vpc`
+- CIDR Block: `192.168.0.0/22`
+- IPv6: ❌ No
+- Tenancy: Default
+- Public Subnets: 2
+- Private Subnets: 4
+- NAT Gateway: ✅ In 1 AZ
 
-* VPC Name: `demo-vpc`
-* CIDR: `192.168.0.0/22`
-* IPv6: ❌ Disabled
-* Tenancy: Default
-* Public Subnets: `2`
-* Private Subnets: `4`
-* NAT Gateway: `1` (Single AZ)
+🔧 Rename Subnets:
+Private:
 
-### 📝 Rename Subnets:
+demo-vpc-app1-subnet
 
-* App Subnets: `demo-vpc-app1-subnet`, `demo-vpc-app2-subnet`
-* DB Subnets: `demo-vpc-db1-subnet`, `demo-vpc-db2-subnet`
-* Web Subnets: `web-1`, `web-2`
+demo-vpc-app2-subnet
 
-### 🔐 Security Groups:
+demo-vpc-db1-subnet
 
-* Create security groups or use default ones.
-* Allow All Traffic temporarily for testing.
+demo-vpc-db2-subnet
 
----
+Public:
 
-## 🪣 **2. S3 Bucket & IAM Role**
+web-1
 
-### ✅ S3 Bucket:
+web-2
 
-* Name: **Globally unique**
-* Versioning: ✅ **Enabled**
+yaml
+Copy
+Edit
 
-### 👮 IAM Role:
+🔐 Create Security Groups (Optional):
+- Web-Tier SG
+- App-Tier SG
+- DB-Tier SG
+- LoadBalancer SG
 
-* Name: `demo-ec2-role-ssm`
-* Type: EC2 Role
-* Permissions: `AmazonEC2RoleforSSM`, `EC2AdminAccess`
-
----
-
-## 🛢️ **3. RDS Setup (MySQL)**
-
-### 📦 DB Subnet Group:
-
-* Name: `db-subnet`
-* VPC: `demo-vpc`
-* AZs: `ap-south-1a`, `ap-south-1b`
-* Subnets: Select DB1 and DB2 subnets
-
-### 📚 Create RDS DB:
-
-* Engine: MySQL
-* Template: Free Tier
-* DB Name: `database-1`
-* Username: `admin`
-* Password: `admin123`
-* VPC: `demo-vpc`
-* Subnet Group: `db-subnet`
-* Security Group: Default
+📢 OR allow all traffic on Default SG for simplicity.
 
 ---
 
-## ⚙️ **4. App Tier Setup**
+## 🪣 Step 2: Create S3 Bucket & IAM Role
 
-### 🚀 Launch EC2 Instance:
+- Create an S3 bucket (globally unique name)
+- Enable: ✅ Versioning
+- Upload: Application Code files (Keep path reference)
 
-* Name: `AppTireInstance`
-* AMI: Amazon Linux 2
-* Type: t2.micro
-* Key Pair: None
-* Network: `demo-vpc`
-* Subnet: app1
-* IAM Role: `demo-ec2-role-ssm`
+👮 IAM Role:
+- Role Type: EC2 Role
+- Permissions: 
+  - `AmazonEC2RoleforSSM`
+  - `EC2AdministratorAccess`
+- Role Name: `demo-ec2-role-ssm`
 
-### 🔗 Connect & Setup:
+---
 
+## 🐬 Step 3: Configure RDS (Database Layer)
+
+🔹 Create DB Subnet Group:
+- Name: `db-subnet`
+- VPC: `demo-vpc`
+- Subnets: `db1` & `db2`
+
+🔹 Launch RDS Instance:
+- Engine: MySQL
+- Template: Free Tier
+- DB Name: `database-1`
+- Username: `admin`
+- Password: `admin123`
+- VPC: `demo-vpc`
+- Subnet Group: `db-subnet`
+- AZ: No preference
+- SG: Default
+
+---
+
+## ⚙️ Step 4: Configure App Tier (Node.js on EC2)
+
+📌 Launch EC2 Instance:
+- Name: `App-Tier-Instance`
+- AMI: Amazon Linux 2
+- Instance Type: `t2.micro`
+- VPC: `demo-vpc`
+- Subnet: `app1-subnet`
+- IAM Role: `demo-ec2-role-ssm`
+
+🔗 Connect using Session Manager:
 ```bash
 sudo su
-ping 8.8.8.8  # Test internet
+whoami
+cd /home/ec2-user
+ping 8.8.8.8  # Check Internet
+🔐 (Optional) Set password:
+
+bash
+Copy
+Edit
+passwd ec2-user
+📦 Install MySQL:
+
+bash
+Copy
+Edit
 sudo yum install mysql -y
-```
+🔌 Connect to RDS:
 
-### 📂 Connect to RDS:
+bash
+Copy
+Edit
+mysql -h <RDS-endpoint> -u admin -padmin123
+📊 Setup Database:
 
-```bash
-mysql -h <rds-endpoint> -u admin -p
-# Example:
-mysql -h database-1.cvu4cuyqyi5s.ap-south-1.rds.amazonaws.com -u admin -padmin123
-```
-
-### 🛠️ Configure MySQL:
-
-```sql
+sql
+Copy
+Edit
 CREATE DATABASE webappdb;
 USE webappdb;
+
 CREATE TABLE IF NOT EXISTS transactions(
-  id INT NOT NULL AUTO_INCREMENT,
-  amount DECIMAL(10,2),
-  description VARCHAR(100),
+  id INT NOT NULL AUTO_INCREMENT, 
+  amount DECIMAL(10,2), 
+  description VARCHAR(100), 
   PRIMARY KEY(id)
 );
+
 INSERT INTO transactions (amount, description) VALUES ('400', 'groceries');
 SELECT * FROM transactions;
-exit;
-```
+☁️ Step 5: Upload Updated App Code to S3
+Edit config:
 
-### 💾 Application Code Setup:
+js
+Copy
+Edit
+DB_HOST = '<RDS-ENDPOINT>';
+DB_USER = 'admin';
+DB_PASSWORD = 'admin123';
+DB_DATABASE = 'webappdb';
+Re-upload app folder to S3 (new version will be created if versioning is ON)
 
-* Update DB config in your local `app-tier/DbConfig`
-* Upload updated code to S3: `application-code/app-tier/`
-
-### 💻 Install Node.js & App:
-
-```bash
+🚀 Step 6: Setup Node.js App in App-Tier EC2
+bash
+Copy
+Edit
 curl -o- https://raw.githubusercontent.com/avizway1/aws_3tier_architecture/main/install.sh | bash
 source ~/.bashrc
 nvm install 16
 nvm use 16
 npm install -g pm2
-```
+📂 Copy files from S3:
 
-### 📥 Copy App Files from S3:
-
-```bash
+bash
+Copy
+Edit
 sudo aws s3 cp s3://<bucket-name>/application-code/app-tier/ app-tier --recursive
 cd app-tier
 npm install
@@ -153,85 +171,111 @@ pm2 status
 pm2 startup
 pm2 save
 curl http://localhost:4000/health
-```
+🧲 Step 7: Create Load Balancer & Target Group
+🌀 Create Target Group:
 
----
+Name: App-Internal-TG
 
-## 📡 **5. Internal Load Balancer**
+Type: Instance
 
-### 🎯 Target Group:
+Port: 4000
 
-* Name: `App-Internal-TG`
-* Protocol: HTTP, Port: 4000
-* Health Check: `/health`
+Protocol: HTTP
 
-### 📶 Load Balancer:
+Health check path: /health
 
-* Name: `App-Internal-LB`
-* Type: Internal
-* VPC: `demo-vpc`
-* AZs: `app1`, `app2` subnets
-* SG: Default
-* Routing: Attach `App-Internal-TG`
+Register App EC2 instance
 
-### ⚙️ Update NGINX Config:
+🌐 Create Load Balancer:
 
-* Replace DNS in `nginx.conf` with internal LB DNS
-* Upload to S3 bucket
+Name: App-Internal-LB
 
----
+Type: Internal
 
-## 🌍 **6. Web Tier Setup**
+VPC: demo-vpc
 
-### 🧾 EC2 Instance:
+Subnets: app1 & app2
 
-* Name: `Web-Tier-Instance`
-* AMI: Amazon Linux 2
-* Type: t2.micro
-* Network: `demo-vpc`
-* Subnet: Public
-* IAM Role: `demo-ec2-role-ssm`
+SG: Default
 
-### 🔧 Setup:
+Listener: Forward to App-Internal-TG
 
-```bash
-sudo su
+🛠️ Update nginx.conf with internal LB DNS & upload to S3 again
+
+🌍 Step 8: Configure Web Tier (Frontend)
+📌 Launch EC2 Instance:
+
+Name: Web-Tier-Instance
+
+Subnet: web-1
+
+Public IP: ✅ Yes
+
+IAM Role: demo-ec2-role-ssm
+
+🔗 Connect using Session Manager:
+
+bash
+Copy
+Edit
+cd /home/ec2-user
+⚙️ Install Node & Build App:
+
+bash
+Copy
+Edit
 curl -o- https://raw.githubusercontent.com/avizway1/aws_3tier_architecture/main/install.sh | bash
 source ~/.bashrc
 nvm install 16
 nvm use 16
 npm install -g pm2
-```
+📂 Copy files:
 
-### 📁 Get Web Files:
-
-```bash
-sudo aws s3 cp s3://<bucket-name>/application-code/web-tier/ web-tier --recursive
+bash
+Copy
+Edit
+sudo aws s3 cp s3://<your-s3-bucket>/application-code/web-tier/ web-tier --recursive
 cd web-tier
 npm install
 npm run build
-```
+🕸️ Install NGINX:
 
-### 🌐 Install & Configure NGINX:
-
-```bash
+bash
+Copy
+Edit
 sudo amazon-linux-extras install nginx1 -y
 cd /etc/nginx
 sudo rm nginx.conf
-sudo aws s3 cp s3://<bucket-name>/application-code/nginx.conf .
+sudo aws s3 cp s3://<your-s3-bucket>/application-code/nginx.conf .
 sudo service nginx restart
-chmod -R 755 /home/ec2-user
 sudo chkconfig nginx on
-```
+chmod -R 755 /home/ec2-user
+📡 Access your App via Public IP:
 
-📡 **Access your app via public IP**:
+cpp
+Copy
+Edit
+http://<Web-Tier-EC2-Public-IP>
+✅ Final Checklist
+✅ Task	Status
+VPC Created	✅
+IAM Role & S3 Bucket Setup	✅
+RDS DB Created & Connected	✅
+App Layer with Node.js + DB	✅
+Load Balancer with Health Checks	✅
+Web Tier with NGINX Setup	✅
+End-to-End App Health Check	✅
 
-```bash
-http://<Web-Tier-Instance-Public-IP>
-```
-
-✅ **Deployment Complete!**
+🏁 Congratulations! Your 3-Tier Application on AWS is Fully Deployed! 🎉🎉
+yaml
+Copy
+Edit
 
 ---
 
-🎉 **Enjoy your working 3-Tier Application on AWS!**
+Let me know if you'd like this as a downloadable **PDF**, **Notion import**, or **README file** for GitHub.
+
+
+
+
+
