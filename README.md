@@ -335,6 +335,7 @@ cd /etc/nginx
 ```  
 # find nginx.conf]
 ```
+```
 sudo rm nginx.conf
 ```
 ````
