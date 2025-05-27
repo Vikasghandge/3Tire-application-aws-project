@@ -1,4 +1,12 @@
 # 🚀 3-Tier AWS Application Project
+<h1 align="center">🚀 3-Tier Application Deployment on AWS ☁️</h1>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/AWS-Cloud-orange?logo=amazon-aws" />
+  <img src="https://img.shields.io/badge/VPC-Network-blue?logo=cloudflare" />
+  <img src="https://img.shields.io/badge/Node.js-App-green?logo=node.js" />
+  <img src="https://img.shields.io/badge/MySQL-Database-blue?logo=mysql" />
+</p>
 
 ## 📌 Project Overview:
 
