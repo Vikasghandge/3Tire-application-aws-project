@@ -1,241 +1,202 @@
-# 🚀 3-Tier AWS Application Project
-<h1 align="center">🚀 3-Tier Application Deployment on AWS ☁️</h1>
+markdown
+# 🚀 3-Tier Application AWS Project 🌩️
 
-<p align="center">
-  <img src="https://img.shields.io/badge/AWS-Cloud-orange?logo=amazon-aws" />
-  <img src="https://img.shields.io/badge/VPC-Network-blue?logo=cloudflare" />
-  <img src="https://img.shields.io/badge/Node.js-App-green?logo=node.js" />
-  <img src="https://img.shields.io/badge/MySQL-Database-blue?logo=mysql" />
-</p>
+```diff
++===========================================================+
+|                  PROJECT REQUIREMENTS                     |
++===========================================================+
+| 🕸️ WEB LAYER    | 🖥️ APP LAYER    | 🗃️ DATABASE LAYER  |
++-----------------+-----------------+-----------------------+
+🔧 1) VPC Creation (Network Foundation)
+bash
+🔵 [LOG] Starting VPC creation...
+✅ VPC Name: demo-vpc
+✅ CIDR: 192.168.0.0/22
+✅ IPv6: Disabled
+✅ Tenancy: Default
+✅ Public Subnets: 2 (Web Tier)
+✅ Private Subnets: 4 (App+DB Tiers)
+✅ NAT Gateway: 1 AZ
+🏷️ Subnet Naming Convention
+markdown
+🟢 Public Subnets:
+- web-1 (AZ1a)
+- web-2 (AZ1b)
 
-## 📌 Project Overview:
+🔴 Private Subnets:
+- demo-vpc-app1-subnet (AZ1a)
+- demo-vpc-app2-subnet (AZ1b)
+- demo-vpc-db1-subnet (AZ1a)
+- demo-vpc-db2-subnet (AZ1b)
+🔐 Security Groups
+diff
+! Important: Either create dedicated SGs or allow all traffic temporarily
++ web-tier-sg
++ app-tier-sg 
++ db-tier-sg
++ lb-sg
+📦 2) S3 Bucket Setup
+bash
+🟣 [LOG] Configuring S3 for code storage...
+🔷 Bucket Name: three-tire-bucket-ssm (must be globally unique)
+🔷 Versioning: ✅ ENABLED (critical for rollbacks)
+🔷 Permissions: Public access blocked (recommended)
+👮 3) IAM Role Configuration
+bash
+🟡 [LOG] Creating EC2 instance role...
+🛠️ Service: EC2
+🔑 Permissions:
+   - AmazonEC2RoleforSSM (required for Session Manager)
+   - EC2-Administrator (temporary for setup)
+📛 Role Name: demo-ec2-role-ssm
+🗄️ 4) RDS Database Setup
+sql
+-- [DATABASE CONFIGURATION LOG] --
+1️⃣ Create Subnet Group:
+   - Name: db-subnet
+   - VPC: demo-vpc
+   - AZs: ap-south-1a, ap-south-1b
+   - Subnets: db1 & db2
 
-A **3-Tier Web Application** hosted on AWS using VPC, EC2, RDS, S3, IAM, and Node.js.
-
----
-
-## 🧰 Requirements:
-
-* **Web Layer** 🕸️
-* **App Layer** ⚙️
-* **Database Layer** 🗄️
-
----
-
-## 🏗️ 1) VPC Creation:
-
-* Go to **VPC → VPC and more**
-* **VPC Name:** `demo-vpc`
-* **CIDR Block:** `192.168.0.0/22`
-* **IPv6:** Not Required
-* **Tenancy:** Default
-* **Public Subnets:** 2
-* **Private Subnets:** 4
-* **NAT Gateway:** In 1 AZ
-
-➡️ Create VPC
-
-### 🔖 Subnet Naming (Post VPC Creation):
-
-* Private Subnets:
-
-  * `demo-vpc-app1-subnet`
-  * `demo-vpc-app2-subnet`
-  * `demo-vpc-db1-subnet`
-  * `demo-vpc-db2-subnet`
-* Public Subnets:
-
-  * `web-1`
-  * `web-2`
-
-### 🔐 Security Groups:
-
-Create separate SGs (optional):
-
-* Web Tier SG
-* App Tier SG
-* DB Tier SG
-* LoadBalancer SG
-
-Or use default SG (Allow All Traffic)
-
----
-
-## 🪣 2) S3 Bucket and IAM Role:
-
-### ✅ S3 Bucket:
-
-* **Name:** Globally unique
-* **Permissions:** Default (Public Access)
-* **Versioning:** Enabled
-
-➡️ Save your application code in a local folder and upload to S3.
-
-### 👤 IAM Role:
-
-* Go to **IAM → Create Role**
-* Select **EC2 Role**
-* Attach Policies:
-
-  * `AmazonEC2RoleforSSM`
-  * `EC2AdministratorAccess`
-* **Role Name:** `demo-ec2-role-ssm`
-
----
-
-## 🗄️ 3) RDS Database:
-
-### Create Subnet Group:
-
-* **Name:** `db-subnet`
-* **VPC:** `demo-vpc`
-* **AZs:** `ap-south-1a`, `ap-south-1b`
-* **Subnets:** `db1`, `db2`
-
-### Create RDS:
-
-* **Engine:** MySQL
-* **Template:** Free Tier
-* **DB Name:** `database-1`
-* **Username:** `admin`
-* **Password:** `admin123`
-* **VPC:** `demo-vpc`
-* **Subnet Group:** `db-subnet`
-* **AZ Preference:** No preference
-* **SG:** Default (for now)
-
-➡️ Launch DB Instance
-
----
-
-## ⚙️ 4) App Tier EC2 Setup:
-
-### Launch EC2:
-
-* **Name:** AppTierInstance
-* **AMI:** Amazon Linux 2
-* **Instance Type:** t2.micro
-* **Key Pair:** Without Key Pair
-* **VPC:** `demo-vpc`
-* **Subnet:** `app-subnet`
-* **Auto-assign IP:** Disabled
-* **SG:** Default or custom
-* **IAM Role:** `demo-ec2-role-ssm`
-
-➡️ Launch and connect using **Session Manager**
-
----
-
-## 🔧 5) EC2 Configuration Commands:
-
-```bash
-sudo su
-```
-
-```bash
-whoami
-```
-
-```bash
-cd ..
-```
-
-```bash
-cd /home/ec2-user
-```
-
-```bash
-ping 8.8.8.8
-```
-
-```bash
-sudo yum install mysql -y
-```
-
-### Connect to RDS:
-
-```bash
-mysql -h <rds-endpoint> -u admin -p
-```
-
-### Inside MySQL:
-
-```sql
-show databases;
-```
-
-```sql
+2️⃣ Launch RDS Instance:
+   - Engine: MySQL
+   - Template: Free Tier
+   - Identifier: database-1
+   - Credentials: 
+     👨‍💻 User: admin
+     🔑 Pass: admin123
+   - VPC: demo-vpc
+   - Connectivity: Default SG (temporary)
+🛠️ Database Initialization
+sql
 CREATE DATABASE webappdb;
-```
 
-```sql
-use webappdb;
-```
+USE webappdb;
 
-```sql
 CREATE TABLE IF NOT EXISTS transactions(
-  id INT NOT NULL AUTO_INCREMENT,
-  amount DECIMAL(10,2),
-  description VARCHAR(100),
+  id INT NOT NULL AUTO_INCREMENT, 
+  amount DECIMAL(10,2), 
+  description VARCHAR(100), 
   PRIMARY KEY(id)
 );
-```
 
-```sql
-INSERT INTO transactions (amount, description) VALUES ('400', 'groceries');
-```
-
-```sql
+INSERT INTO transactions VALUES (1, 400, 'groceries');
+-- Verify with:
 SELECT * FROM transactions;
-```
+🖥️ 5) Application Tier Setup
+bash
+🟠 [LOG] Launching App Tier EC2...
+🖥️ Instance Name: AppTierInstance
+📀 AMI: Amazon Linux 2
+⚙️ Type: t2.micro
+🔗 IAM Role: demo-ec2-role-ssm (CRITICAL!)
+🌐 Network: 
+   - VPC: demo-vpc
+   - Subnet: app1-subnet
+🔄 App Server Configuration
+bash
+# Connect via Session Manager
+sudo su
+cd /home/ec2-user
 
-```sql
-exit;
-```
+# Install MySQL client
+sudo yum install mysql -y
 
----
+# Test DB connection
+mysql -h [RDS_ENDPOINT] -u admin -padmin123
 
-## 📝 6) Update DB Config in App Code:
-
-* Replace values in the config file with:
-
-  * `DB_HOST`: `<your-rds-endpoint>`
-  * `DB_USER`: `admin`
-  * `DB_PASSWORD`: `admin123`
-  * `DB_DATABASE`: `webappdb`
-
-➡️ Upload updated code/config back to **S3 bucket** (with versioning enabled)
-
----
-
-## 📦 7) Install Node.js and App Dependencies:
-
-```bash
+# Node.js Setup
 curl -o- https://raw.githubusercontent.com/avizway1/aws_3tier_architecture/main/install.sh | bash
-```
-
-```bash
 source ~/.bashrc
-```
-
-```bash
 nvm install 16
-```
-
-```bash
 nvm use 16
-```
-
-```bash
 npm install -g pm2
-```
 
-```bash
-cd ~/
-```
+# Deploy App Code
+sudo aws s3 cp s3://three-tire-bucket-ssm/application-code/app-tier/ app-tier --recursive
+cd app-tier
+npm install
+pm2 start index.js
+pm2 save
+pm2 startup
 
-➡️ Done! You're now ready to fetch app code from S3 and run your app using `pm2`.
+# Verify health check
+curl http://localhost:4000/health
+⚖️ Load Balancer Configuration
+markdown
+1️⃣ Target Group:
+   - Name: App-Internal-TG
+   - Protocol: HTTP:4000
+   - Health Check: /health
+   - Targets: AppTierInstance
 
----
+2️⃣ Application LB:
+   - Name: App-Internal-LB
+   - Scheme: Internal
+   - Subnets: app1 & app2
+   - Security Group: default
+   - Listener: Forward to App-Internal-TG
+🌐 Web Tier Setup
+bash
+🔵 [LOG] Launching Web Tier...
+🖥️ Instance Name: WebTierInstance
+🌍 Public IP: Enabled
+🔗 IAM Role: demo-ec2-role-ssm
 
-✨ *Good luck with your deployment!* 🚀
+# After connection:
+sudo su
+cd /home/ec2-user
+
+# Node.js Installation (same as app tier)
+
+# Deploy Web Code
+sudo aws s3 cp s3://three-tire-bucket-ssm/application-code/web-tier/ web-tier --recursive
+cd web-tier
+npm install
+npm run build
+
+# NGINX Setup
+sudo amazon-linux-extras install nginx1 -y
+cd /etc/nginx
+sudo rm nginx.conf
+sudo aws s3 cp s3://three-tire-bucket-ssm/application-code/nginx.conf .
+sudo service nginx restart
+chmod -R 755 /home/ec2-user
+sudo chkconfig nginx on
+🎉 Final Verification
+bash
+🌐 Access via: http://<Web-Tier-Public-IP>
+🔍 Check all components:
+   - Web Tier (NGINX) → App Tier (PM2) → DB Tier (RDS)
+   - All health checks passing
+   - Data flowing end-to-end
+diff
++===========================================================+
+|                🎯 PROJECT DEPLOYMENT SUCCESS! 🎯           |
++===========================================================+
+|  Web Tier: Running on Public IP                           |
+|  App Tier: Healthy in Private Subnets                     |
+|  Database: Accessible only from App Tier                  |
+|  Security: Properly isolated 3-tier architecture          |
++-----------------------------------------------------------+
+💡 Pro Tips:
+
+Always enable versioning for S3 buckets
+
+Restrict RDS security groups to only app tier later
+
+Consider using Parameter Store for credentials
+
+Set up proper monitoring for all tiers
+
+Implement auto-scaling for web/app tiers
+
+🔧 Troubleshooting:
+
+Check CloudWatch logs for each component
+
+Verify security group rules
+
+Test connectivity between each tier
+
+Confirm IAM roles are properly attached
