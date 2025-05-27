@@ -18,15 +18,15 @@ requirements:
 - then create VPC.
 
 
-after vpc got created sucessfully.
-change the name of subnets of understanding
-like we have 6 subnets 2 public and 4 private.
-add name in first private subent like //  demo-vpc-app1-subnet, demo-vpc-app2-subnet
-another two private subnet: // demo-vpc-db1-subnet, demo-vpc-db2-subnet 
-and to public subnets // give name them web-1 and web2
+- after vpc got created sucessfully.
+- change the name of subnets of understanding
+- like we have 6 subnets 2 public and 4 private.
+- add name in first private subent like //  demo-vpc-app1-subnet, demo-vpc-app2-subnet
+- another two private subnet: // demo-vpc-db1-subnet, demo-vpc-db2-subnet 
+- and to public subnets // give name them web-1 and web2
 
-if you wanto to create proper security groups u can create separat security geoups like web tire, app tire, db tire, loadbalancer.
-of use default security make sure enable all-traffic-allow
+- if you wanto to create proper security groups u can create separat security geoups like web tire, app tire, db tire, loadbalancer.
+  of use default security make sure enable all-traffic-allow.
 
 
 ### 2) Creation of S3 Bucket and IAM Role.
