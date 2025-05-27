@@ -1,4 +1,11 @@
-# 🚀 **3-Tier Application AWS Project Guide**
+#  🚀 3-Tier Application AWS Project 🌩️
+
+```diff
++===========================================================+
+|                  PROJECT REQUIREMENTS                     |
++===========================================================+
+| 🕸️ WEB LAYER    | 🖥️ APP LAYER    | 🗃️ DATABASE LAYER  |
++-----------------+-----------------+-----------------------+
 
 ---
 
