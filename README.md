@@ -109,7 +109,7 @@ sudo yum install mysql -y
 ```
 
 login into database follow below give command
-```
+
 ```
 mysql -h <rds //database endpoint// > -u < username > -p < password >
 
