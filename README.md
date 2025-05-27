@@ -30,25 +30,25 @@ requirements:
 
 
 ### 2) Creation of S3 Bucket and IAM Role.
-Create S3 Bucket With Default Permissions and Public Access.
-name: add any globally unique name:
-versioning: enabled # it should be enabled make sure
-now then first the you need to save application code into loal file manager. save it like repo and keep know path of file.
+- Create S3 Bucket With Default Permissions and Public Access.
+- name: add any globally unique name:
+- versioning: enabled # it should be enabled make sure
+- now then first the you need to save application code into loal file manager. save it like repo and keep know path of file.
 
 ### 3) Now Need to IAM Role.
-go to AWS Console and Select IAM Create Role which selecting Role Select EC2-Role and then Add permissions 
-in Permsiions search AmazoneEC2RoleforSSM select optional select EC2-Adminstratir 
-Name: demo-ec2-role-ssm
+- go to AWS Console and Select IAM Create Role which selecting Role Select EC2-Role and then Add permissions 
+- in Permsiions search AmazoneEC2RoleforSSM select optional select EC2-Adminstratir 
+- Name: demo-ec2-role-ssm
 
 ### 4) congiure RDS DATABASE:-
-In RDS we need to configure Subnet Group First.
-Create Subnet Group: db-subnet
-VPC: your created vpc like demo-vpc select it.
-AZS: ap-south-1a, ap-south-1b
-Subnets: select db1 and db2 subnets.
+- In RDS we need to configure Subnet Group First.
+- Create Subnet Group: db-subnet
+- VPC: your created vpc like demo-vpc select it.
+- AZS: ap-south-1a, ap-south-1b
+- Subnets: select db1 and db2 subnets.
 
-Go Back and Create RDS Database:
-Standard:
+- Go Back and Create RDS Database:
+- Standard:
 Engine: Mysql
 Template: Free 
 DB Name: database-1
